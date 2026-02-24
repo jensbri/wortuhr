@@ -1,0 +1,95 @@
+import datetime
+import time
+import os
+from IPython.display import HTML, display, clear_output
+
+# Zeitzone auf Deutschland setzen (wichtig für Google Colab Server)
+os.environ['TZ'] = 'Europe/Berlin'
+try:
+    time.tzset()
+except AttributeError:
+    # Falls auf Windows-Systemen ausgeführt, wird tzset ignoriert
+    pass
+
+def get_word_clock_html():
+    now = datetime.datetime.now()
+    hour = now.hour % 12
+    minute = now.minute
+    
+    # Das Layout deines Fotos
+    layout = [
+        ["ES", "IST", "ZEHN", "FÜNF"],
+        ["VIERTEL", "MINUTEN"],
+        ["VOR", "NACH", "HALB"],
+        ["EINS", "SIEBEN", "ZWEI"],
+        ["DREI", "VIER"],
+        ["ACHT", "FÜNF", "ZWÖLF"],
+        ["ZEHN", "ELF"],
+        ["NEUN", "SECHS", "UHR"]
+    ]
+    
+    active_words = ["ES", "IST"]
+    dots = minute % 5
+    m_base = (minute // 5) * 5
+    
+    # Minuten-Logik
+    if m_base == 5: active_words += ["FÜNF", "NACH"]
+    elif m_base == 10: active_words += ["ZEHN", "NACH", "MINUTEN"]
+    elif m_base == 15: active_words += ["VIERTEL", "NACH"]
+    elif m_base == 20: active_words += ["ZEHN", "VOR", "HALB", "MINUTEN"]
+    elif m_base == 25: active_words += ["FÜNF", "VOR", "HALB", "MINUTEN"]
+    elif m_base == 30: active_words += ["HALB"]
+    elif m_base == 35: active_words += ["FÜNF", "NACH", "HALB", "MINUTEN"]
+    elif m_base == 40: active_words += ["ZEHN", "NACH", "HALB", "MINUTEN"]
+    elif m_base == 45: active_words += ["VIERTEL", "VOR"]
+    elif m_base == 50: active_words += ["ZEHN", "VOR", "MINUTEN"]
+    elif m_base == 55: active_words += ["FÜNF", "VOR"]
+
+    # Stunden-Logik: Ab Minute 20 (zehn vor halb) auf die nächste Stunde springen
+    display_hour = (hour + 1) % 12 if m_base >= 20 else hour
+    if display_hour == 0: display_hour = 12
+    
+    hour_map = {
+        1: "EINS", 2: "ZWEI", 3: "DREI", 4: "VIER", 5: "FÜNF",
+        6: "SECHS", 7: "SIEBEN", 8: "ACHT", 9: "NEUN", 10: "ZEHN",
+        11: "ELF", 12: "ZWÖLF"
+    }
+    active_words.append(hour_map[display_hour])
+    
+    if m_base == 0:
+        active_words.append("UHR")
+
+    # CSS für das "Leuchten"
+    html_code = f"""
+    <div style="background-color: #000; padding: 40px; border-radius: 20px; width: 380px; font-family: 'Courier New', monospace; margin: auto;">
+        <div style="color: #444; font-size: 12px; margin-bottom: 20px; text-align: right;">{now.strftime('%H:%M:%S')}</div>
+    """
+    
+    for row in layout:
+        html_code += '<div style="display: flex; justify-content: space-between; margin-bottom: 12px;">'
+        for word in row:
+            is_active = word in active_words
+            color = "#fff" if is_active else "#222"
+            glow = "text-shadow: 0 0 12px #fff, 0 0 20px #fff;" if is_active else ""
+            html_code += f'<span style="color: {color}; font-weight: bold; font-size: 24px; {glow}">{word}</span>'
+        html_code += '</div>'
+        
+    # Die 4 Minuten-Punkte
+    html_code += '<div style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">'
+    for i in range(4):
+        active_dot = i < dots
+        dot_color = "#fff" if active_dot else "#222"
+        dot_glow = "box-shadow: 0 0 10px #fff;" if active_dot else ""
+        html_code += f'<div style="width: 12px; height: 12px; border-radius: 3px; background-color: {dot_color}; {dot_glow}"></div>'
+    html_code += '</div></div>'
+    
+    return html_code
+
+# Endlosschleife
+try:
+    while True:
+        clear_output(wait=True)
+        display(HTML(get_word_clock_html()))
+        time.sleep(10)
+except KeyboardInterrupt:
+    print("Uhr gestoppt.")
