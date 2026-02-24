@@ -86,26 +86,26 @@
             let dots = minute % 5;
             let m_base = Math.floor(minute / 5) * 5;
 
-            // Minuten-Logik
-            if (m_base === 5) activeWords.push("FÜNF", "NACH");
-            else if (m_base === 10) activeWords.push("ZEHN", "NACH", "MINUTEN");
+            // Minuten-Logik (FÜNF und ZEHN explizit als MINUTEN markiert)
+            if (m_base === 5) activeWords.push("FÜNF_MIN", "NACH");
+            else if (m_base === 10) activeWords.push("ZEHN_MIN", "NACH", "MINUTEN");
             else if (m_base === 15) activeWords.push("VIERTEL", "NACH");
-            else if (m_base === 20) activeWords.push("ZEHN", "VOR", "HALB", "MINUTEN");
-            else if (m_base === 25) activeWords.push("FÜNF", "VOR", "HALB", "MINUTEN");
+            else if (m_base === 20) activeWords.push("ZEHN_MIN", "VOR", "HALB", "MINUTEN");
+            else if (m_base === 25) activeWords.push("FÜNF_MIN", "VOR", "HALB", "MINUTEN");
             else if (m_base === 30) activeWords.push("HALB");
-            else if (m_base === 35) activeWords.push("FÜNF", "NACH", "HALB", "MINUTEN");
-            else if (m_base === 40) activeWords.push("ZEHN", "NACH", "HALB", "MINUTEN");
+            else if (m_base === 35) activeWords.push("FÜNF_MIN", "NACH", "HALB", "MINUTEN");
+            else if (m_base === 40) activeWords.push("ZEHN_MIN", "NACH", "HALB", "MINUTEN");
             else if (m_base === 45) activeWords.push("VIERTEL", "VOR");
-            else if (m_base === 50) activeWords.push("ZEHN", "VOR", "MINUTEN");
-            else if (m_base === 55) activeWords.push("FÜNF", "VOR");
+            else if (m_base === 50) activeWords.push("ZEHN_MIN", "VOR", "MINUTEN");
+            else if (m_base === 55) activeWords.push("FÜNF_MIN", "VOR");
 
             // Stunden-Logik (Sprung ab Minute 20)
             let displayHour = (m_base >= 20) ? (hour + 1) % 12 : hour;
             if (displayHour === 0) displayHour = 12;
 
             const hourMap = {
-                1: "EINS", 2: "ZWEI", 3: "DREI", 4: "VIER", 5: "FÜNF",
-                6: "SECHS", 7: "SIEBEN", 8: "ACHT", 9: "NEUN", 10: "ZEHN",
+                1: "EINS", 2: "ZWEI", 3: "DREI", 4: "VIER", 5: "FÜNF_HR",
+                6: "SECHS", 7: "SIEBEN", 8: "ACHT", 9: "NEUN", 10: "ZEHN_HR",
                 11: "ELF", 12: "ZWÖLF"
             };
             activeWords.push(hourMap[displayHour]);
@@ -113,8 +113,17 @@
             if (m_base === 0) activeWords.push("UHR");
 
             // UI Aktualisieren: Wörter
-            document.querySelectorAll('.word').forEach(el => {
-                if (activeWords.includes(el.innerText)) {
+            document.querySelectorAll('.word').forEach((el, index) => {
+                let text = el.innerText;
+                
+                // Unterscheidung zwischen Minuten- und Stunden-Wörtern (die doppelt vorkommen)
+                // Die erste Zeile auf dem Board ist Index 0 bis 3. 
+                if (text === "FÜNF" && index < 4) text = "FÜNF_MIN";
+                if (text === "FÜNF" && index > 4) text = "FÜNF_HR";
+                if (text === "ZEHN" && index < 4) text = "ZEHN_MIN";
+                if (text === "ZEHN" && index > 4) text = "ZEHN_HR";
+
+                if (activeWords.includes(text)) {
                     el.classList.add('active');
                 } else {
                     el.classList.remove('active');
@@ -137,3 +146,4 @@
     </script>
 </body>
 </html>
+
