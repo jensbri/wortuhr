@@ -21,6 +21,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             width: 380px;
             user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .grid-container {
+            width: 100%;
         }
         .row {
             display: flex;
@@ -38,7 +44,8 @@
             text-shadow: 0 0 12px #fff, 0 0 20px #fff;
         }
         .dots-container {
-            margin-top: 30px;
+            margin-top: 20px;
+            margin-bottom: 30px;
             display: flex;
             justify-content: center;
             gap: 15px;
@@ -54,19 +61,55 @@
             background-color: #fff;
             box-shadow: 0 0 10px #fff;
         }
+        
+        /* Toggle Button Styles */
+        .lang-toggle {
+            background-color: #1a1a1a;
+            border-radius: 20px;
+            padding: 5px 10px;
+            display: inline-flex;
+            gap: 15px;
+            cursor: pointer;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+        .flag {
+            font-size: 20px;
+            filter: grayscale(100%);
+            opacity: 0.2;
+            transition: all 0.3s ease;
+        }
+        .flag.active-flag {
+            opacity: 1;
+            filter: grayscale(100%) brightness(1.5);
+        }
     </style>
 </head>
 <body>
 
     <div class="clock-container">
-        <div class="row"><span class="word">ES</span><span class="word">IST</span><span class="word">ZEHN</span><span class="word">FÜNF</span></div>
-        <div class="row"><span class="word">VIERTEL</span><span class="word">MINUTEN</span></div>
-        <div class="row"><span class="word">VOR</span><span class="word">NACH</span><span class="word">HALB</span></div>
-        <div class="row"><span class="word">EINS</span><span class="word">SIEBEN</span><span class="word">ZWEI</span></div>
-        <div class="row"><span class="word">DREI</span><span class="word">VIER</span></div>
-        <div class="row"><span class="word">ACHT</span><span class="word">FÜNF</span><span class="word">ZWÖLF</span></div>
-        <div class="row"><span class="word">ZEHN</span><span class="word">ELF</span></div>
-        <div class="row"><span class="word">NEUN</span><span class="word">SECHS</span><span class="word">UHR</span></div>
+        
+        <div id="clock-de" class="grid-container">
+            <div class="row"><span class="word">ES</span><span class="word">IST</span><span class="word" data-id="ZEHN_MIN">ZEHN</span><span class="word" data-id="FÜNF_MIN">FÜNF</span></div>
+            <div class="row"><span class="word">VIERTEL</span><span class="word">MINUTEN</span></div>
+            <div class="row"><span class="word">VOR</span><span class="word">NACH</span><span class="word">HALB</span></div>
+            <div class="row"><span class="word">EINS</span><span class="word">SIEBEN</span><span class="word">ZWEI</span></div>
+            <div class="row"><span class="word">DREI</span><span class="word">VIER</span></div>
+            <div class="row"><span class="word">ACHT</span><span class="word" data-id="FÜNF_HR">FÜNF</span><span class="word">ZWÖLF</span></div>
+            <div class="row"><span class="word" data-id="ZEHN_HR">ZEHN</span><span class="word">ELF</span></div>
+            <div class="row"><span class="word">NEUN</span><span class="word">SECHS</span><span class="word">UHR</span></div>
+        </div>
+
+        <div id="clock-en" class="grid-container" style="display: none;">
+            <div class="row"><span class="word">IT</span><span class="word">IS</span><span class="word">HALF</span><span class="word" data-id="TEN_MIN">TEN</span></div>
+            <div class="row"><span class="word">QUARTER</span><span class="word">TWENTY</span></div>
+            <div class="row"><span class="word" data-id="FIVE_MIN">FIVE</span><span class="word">MINUTES</span><span class="word">TO</span></div>
+            <div class="row"><span class="word">PAST</span><span class="word">ONE</span><span class="word">TWO</span></div>
+            <div class="row"><span class="word">THREE</span><span class="word">FOUR</span><span class="word" data-id="FIVE_HR">FIVE</span></div>
+            <div class="row"><span class="word">SIX</span><span class="word">SEVEN</span><span class="word">EIGHT</span></div>
+            <div class="row"><span class="word">NINE</span><span class="word" data-id="TEN_HR">TEN</span><span class="word">ELEVEN</span></div>
+            <div class="row"><span class="word">TWELVE</span><span class="word">O'CLOCK</span></div>
+        </div>
         
         <div class="dots-container">
             <div class="dot" id="dot-1"></div>
@@ -74,56 +117,109 @@
             <div class="dot" id="dot-3"></div>
             <div class="dot" id="dot-4"></div>
         </div>
+
+        <div class="lang-toggle" onclick="toggleLanguage()">
+            <span id="flag-de" class="flag active-flag">🇩🇪</span>
+            <span id="flag-nz" class="flag">🇳🇿</span>
+        </div>
+
     </div>
 
     <script>
+        let currentLang = 'de';
+
+        function toggleLanguage() {
+            if (currentLang === 'de') {
+                currentLang = 'en';
+                document.getElementById('clock-de').style.display = 'none';
+                document.getElementById('clock-en').style.display = 'block';
+                document.getElementById('flag-de').classList.remove('active-flag');
+                document.getElementById('flag-nz').classList.add('active-flag');
+            } else {
+                currentLang = 'de';
+                document.getElementById('clock-en').style.display = 'none';
+                document.getElementById('clock-de').style.display = 'block';
+                document.getElementById('flag-nz').classList.remove('active-flag');
+                document.getElementById('flag-de').classList.add('active-flag');
+            }
+            updateClock();
+        }
+
         function updateClock() {
             const now = new Date();
             let hour = now.getHours() % 12;
             let minute = now.getMinutes();
 
-            let activeWords = ["ES", "IST"];
+            let activeWords = [];
             let dots = minute % 5;
             let m_base = Math.floor(minute / 5) * 5;
 
-            // Minuten-Logik (FÜNF und ZEHN explizit als MINUTEN markiert)
-            if (m_base === 5) activeWords.push("FÜNF_MIN", "NACH");
-            else if (m_base === 10) activeWords.push("ZEHN_MIN", "NACH", "MINUTEN");
-            else if (m_base === 15) activeWords.push("VIERTEL", "NACH");
-            else if (m_base === 20) activeWords.push("ZEHN_MIN", "VOR", "HALB", "MINUTEN");
-            else if (m_base === 25) activeWords.push("FÜNF_MIN", "VOR", "HALB", "MINUTEN");
-            else if (m_base === 30) activeWords.push("HALB");
-            else if (m_base === 35) activeWords.push("FÜNF_MIN", "NACH", "HALB", "MINUTEN");
-            else if (m_base === 40) activeWords.push("ZEHN_MIN", "NACH", "HALB", "MINUTEN");
-            else if (m_base === 45) activeWords.push("VIERTEL", "VOR");
-            else if (m_base === 50) activeWords.push("ZEHN_MIN", "VOR", "MINUTEN");
-            else if (m_base === 55) activeWords.push("FÜNF_MIN", "VOR");
-
-            // Stunden-Logik (Sprung ab Minute 20)
-            let displayHour = (m_base >= 20) ? (hour + 1) % 12 : hour;
-            if (displayHour === 0) displayHour = 12;
-
-            const hourMap = {
-                1: "EINS", 2: "ZWEI", 3: "DREI", 4: "VIER", 5: "FÜNF_HR",
-                6: "SECHS", 7: "SIEBEN", 8: "ACHT", 9: "NEUN", 10: "ZEHN_HR",
-                11: "ELF", 12: "ZWÖLF"
-            };
-            activeWords.push(hourMap[displayHour]);
-
-            if (m_base === 0) activeWords.push("UHR");
-
-            // UI Aktualisieren: Wörter
-            document.querySelectorAll('.word').forEach((el, index) => {
-                let text = el.innerText;
+            if (currentLang === 'de') {
+                activeWords = ["ES", "IST"];
                 
-                // Unterscheidung zwischen Minuten- und Stunden-Wörtern (die doppelt vorkommen)
-                // Die erste Zeile auf dem Board ist Index 0 bis 3. 
-                if (text === "FÜNF" && index < 4) text = "FÜNF_MIN";
-                if (text === "FÜNF" && index > 4) text = "FÜNF_HR";
-                if (text === "ZEHN" && index < 4) text = "ZEHN_MIN";
-                if (text === "ZEHN" && index > 4) text = "ZEHN_HR";
+                // Minuten-Logik DE
+                if (m_base === 5) activeWords.push("FÜNF_MIN", "NACH");
+                else if (m_base === 10) activeWords.push("ZEHN_MIN", "NACH", "MINUTEN");
+                else if (m_base === 15) activeWords.push("VIERTEL", "NACH");
+                else if (m_base === 20) activeWords.push("ZEHN_MIN", "VOR", "HALB", "MINUTEN");
+                else if (m_base === 25) activeWords.push("FÜNF_MIN", "VOR", "HALB", "MINUTEN");
+                else if (m_base === 30) activeWords.push("HALB");
+                else if (m_base === 35) activeWords.push("FÜNF_MIN", "NACH", "HALB", "MINUTEN");
+                else if (m_base === 40) activeWords.push("ZEHN_MIN", "NACH", "HALB", "MINUTEN");
+                else if (m_base === 45) activeWords.push("VIERTEL", "VOR");
+                else if (m_base === 50) activeWords.push("ZEHN_MIN", "VOR", "MINUTEN");
+                else if (m_base === 55) activeWords.push("FÜNF_MIN", "VOR");
 
-                if (activeWords.includes(text)) {
+                let displayHour = (m_base >= 20) ? (hour + 1) % 12 : hour;
+                if (displayHour === 0) displayHour = 12;
+
+                const hourMapDE = {
+                    1: "EINS", 2: "ZWEI", 3: "DREI", 4: "VIER", 5: "FÜNF_HR",
+                    6: "SECHS", 7: "SIEBEN", 8: "ACHT", 9: "NEUN", 10: "ZEHN_HR",
+                    11: "ELF", 12: "ZWÖLF"
+                };
+                activeWords.push(hourMapDE[displayHour]);
+                if (m_base === 0) activeWords.push("UHR");
+
+            } else {
+                // Logik EN (NZ)
+                activeWords = ["IT", "IS"];
+                
+                // Im Englischen springt die Stunde erst nach "Half past" (ab Minute 35)
+                let displayHour = (m_base > 30) ? (hour + 1) % 12 : hour;
+                if (displayHour === 0) displayHour = 12;
+
+                if (m_base === 5) activeWords.push("FIVE_MIN", "MINUTES", "PAST");
+                else if (m_base === 10) activeWords.push("TEN_MIN", "MINUTES", "PAST");
+                else if (m_base === 15) activeWords.push("QUARTER", "PAST");
+                else if (m_base === 20) activeWords.push("TWENTY", "MINUTES", "PAST");
+                else if (m_base === 25) activeWords.push("TWENTY", "FIVE_MIN", "MINUTES", "PAST");
+                else if (m_base === 30) activeWords.push("HALF", "PAST");
+                else if (m_base === 35) activeWords.push("TWENTY", "FIVE_MIN", "MINUTES", "TO");
+                else if (m_base === 40) activeWords.push("TWENTY", "MINUTES", "TO");
+                else if (m_base === 45) activeWords.push("QUARTER", "TO");
+                else if (m_base === 50) activeWords.push("TEN_MIN", "MINUTES", "TO");
+                else if (m_base === 55) activeWords.push("FIVE_MIN", "MINUTES", "TO");
+
+                const hourMapEN = {
+                    1: "ONE", 2: "ZWEI", 3: "THREE", 4: "FOUR", 5: "FIVE_HR",
+                    6: "SIX", 7: "SEVEN", 8: "EIGHT", 9: "NINE", 10: "TEN_HR",
+                    11: "ELEVEN", 12: "TWELVE"
+                };
+                // Kleine Korrektur für "TWO" (Da es in DE ZWEI heißt und ich keine Doppelbelegung riskieren will, 
+                // steht im englischen Raster TWO. hourMapEN[2] muss "TWO" sein)
+                hourMapEN[2] = "TWO"; 
+                
+                activeWords.push(hourMapEN[displayHour]);
+                if (m_base === 0) activeWords.push("O'CLOCK");
+            }
+
+            // UI Aktualisieren: Wörter (greift auf das aktuell sichtbare Raster zu)
+            const activeGrid = currentLang === 'de' ? '#clock-de' : '#clock-en';
+            document.querySelectorAll(`${activeGrid} .word`).forEach(el => {
+                let textId = el.getAttribute('data-id') || el.innerText;
+                
+                if (activeWords.includes(textId)) {
                     el.classList.add('active');
                 } else {
                     el.classList.remove('active');
@@ -131,8 +227,7 @@
             });
 
             // UI Aktualisieren: Punkte
-            const dotElements = document.querySelectorAll('.dot');
-            dotElements.forEach((el, index) => {
+            document.querySelectorAll('.dot').forEach((el, index) => {
                 if (index < dots) {
                     el.classList.add('dot-active');
                 } else {
@@ -141,9 +236,9 @@
             });
         }
 
+        // Init & Timer
         updateClock();
         setInterval(updateClock, 1000);
     </script>
 </body>
 </html>
-
